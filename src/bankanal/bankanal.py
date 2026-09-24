@@ -27,7 +27,6 @@ bot = commands.Bot(command_prefix="!", intents = intents, help_command=None)
 async def setup_DB():
     bot.db = await aiosqlite.connect("amazing.db")
     bot.db.row_factory = aiosqlite.Row 
-
     await bot.db.execute(
         """
         CREATE TABLE IF NOT EXISTS esass (
@@ -36,6 +35,7 @@ async def setup_DB():
         )
 """
     )
+    logging.info("DB is running")
     await bot.db.commit() #... i really need to execute it before commiting
 #--------------------------------------------------------
 
@@ -63,22 +63,31 @@ async def help(ctx):
     )
     embed.add_field(
         name = "How can you use this?",
-        value = f"You can set trap channel by using `!setbannedchannel *channel name*`",
+        value = 
+        f"""
+        You can set trap channel by using `!setbannedchannel *channel tag*`
+        If you forgot what channel was it, you can check it by `!getbannedchannel`
+        """
+        ,
         inline=False
     )
-    await ctx.send(embed=embed)
+    await ctx.reply(embed=embed)
 
 
 
 @bot.command(name="setbannedchannel")
 @commands.has_permissions(ban_members = True, kick_members = True)
-async def setbannedchannel(ctx):
-    pass
-
+async def setbannedchannel(ctx, channel: discord.TextChannel):
+    server = ctx.guild
+    await db.execute("UPDATE esass SET banned_channel_id = ? WHERE server_id = ?", (channel.id, server.id))
+    await db.commit
 
 @setbannedchannel.error
 async def setbannedchannelError(ctx, error):
-    await ctx.send("You cant set this without ban permission")
+    if isinstance(error, commands.ChannelNotFound):
+        await ctx.send("Channel not found")
+    elif isinstance(error,commands.MissingPermissions):
+        await ctx.send("You cant set this without ban permission")
 
 #--------------------------------------------------------
 

@@ -18,6 +18,7 @@ logging.basicConfig(  #maybe?
 )
 
 intents = discord.Intents.default()
+intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents = intents, help_command=None)
 
 
@@ -35,9 +36,19 @@ async def setup_DB():
         )
 """
     )
+    await bot.db.commit() #... i really need to execute it before commiting
 #--------------------------------------------------------
 
+@bot.command(name="salam")
+async def salam(ctx):
+    await ctx.send("Test")
 
+@bot.command(name="currid")
+async def currid(ctx):
+    if not ctx.guild:
+        await ctx.send("...Niye")
+        return
+    await ctx.send(f" `{ctx.guild.id }`")
 
 
 
@@ -45,14 +56,20 @@ async def setup_DB():
 #--------------------------------------------------------
 
 async def main() -> None:
-    await bot.start(os.getenv("BOTSS"))
+    try:
+        await setup_DB()
+    except Exception as e:
+        logging.error(f" DB `{e}")
+        return
+
+    try:
+        await bot.start(os.getenv("BOTSS"))
+    finally:
+        if hasattr(bot, "db"):
+            await bot.db.close()
+
 
 def run():
-    try:
-        setup_DB()
-    except:
-        logging.error("DB")
-        return
     try:
         asyncio.run(main())
     except:

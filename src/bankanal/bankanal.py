@@ -50,8 +50,35 @@ async def currid(ctx):
         return
     await ctx.send(f" `{ctx.guild.id }`")
 
+@bot.command(name="help")
+async def help(ctx):
+    embed = discord.Embed(
+        title="Information",
+        color=discord.Color.green()
+    )
+    embed.add_field(
+        name = "What is this bot?",
+        value = f"This is a bot that you can set `traps` for malicious bots spams. These bots created to spam every channel in a server. By settings a `trap` channel, this bot can find and kick these spammers",
+        inline=False
+    )
+    embed.add_field(
+        name = "How can you use this?",
+        value = f"You can set trap channel by using `!setbannedchannel *channel name*`",
+        inline=False
+    )
+    await ctx.send(embed=embed)
 
 
+
+@bot.command(name="setbannedchannel")
+@commands.has_permissions(ban_members = True, kick_members = True)
+async def setbannedchannel(ctx):
+    pass
+
+
+@setbannedchannel.error
+async def setbannedchannelError(ctx, error):
+    await ctx.send("You cant set this without ban permission")
 
 #--------------------------------------------------------
 
